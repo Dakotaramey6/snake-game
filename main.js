@@ -90,13 +90,16 @@ function updateGameArea() {
     gameArea.stop();
     gameOverString();
     createStartOverBtn();
+    score = 0;
   } else {
     gameArea.clear();
     sprite.newPos();
     sprite.update();
     fruit.update();
+    scoreUpdate();
     if (!sprite.fruitCollison(fruit)) {
       fruit.randomSpawn();
+      score += 10;
     }
   }
 }
@@ -123,6 +126,12 @@ function gameOverString() {
   ctx.textAlign = "center";
   ctx.font = "50px comic sans";
   ctx.fillText("GAME OVER", 200, 200);
+}
+
+function scoreUpdate() {
+  let ctx = gameArea.context;
+  ctx.font = "20px comic sans";
+  ctx.fillText(`Score : ${score}`, 10, 20);
 }
 
 function createStartOverBtn() {
