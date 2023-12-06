@@ -1,8 +1,12 @@
 "use strict";
 let sprite;
+let fruit;
 let score = 0;
+
 function startGame() {
   sprite = new SpriteBuilder(30, 30, "red", 185, 185);
+  fruit = new SpriteBuilder(25, 25, "green", 270, 185);
+
   gameArea.start();
 }
 
@@ -31,6 +35,7 @@ class SpriteBuilder {
     this.y = y;
     this.posY = 0;
     this.posX = 0;
+
     this.update = function () {
       let ctx = gameArea.context;
       ctx.fillStyle = color;
@@ -41,24 +46,58 @@ class SpriteBuilder {
       this.x += this.posX;
       this.y += this.posY;
     };
-    this.collision = function () {
+    this.wallCollision = function () {
       let crash = false;
+
       if (this.x < 0 || this.x > 370) {
         return (crash = true);
       } else if (this.y < 0 || this.y > 370) {
         return (crash = true);
       }
     };
+    this.randomSpawn = function () {
+      let fruitLoctionX = Math.floor(Math.random() * 360);
+      let fruitLoctionY = Math.floor(Math.random() * 360);
+
+      this.x = fruitLoctionX;
+      this.y = fruitLoctionY;
+    };
+    this.fruitCollison = function (otherobj) {
+      const myleft = this.x;
+      const myright = this.x + this.width;
+      const mytop = this.y;
+      const mybottom = this.y + this.height;
+      const otherleft = otherobj.x;
+      const otherright = otherobj.x + otherobj.width;
+      const othertop = otherobj.y;
+      const otherbottom = otherobj.y + otherobj.height;
+      let fruitCrash = false;
+      if (
+        mybottom < othertop ||
+        mytop > otherbottom ||
+        myright < otherleft ||
+        myleft > otherright
+      ) {
+        fruitCrash = true;
+      }
+      return fruitCrash;
+    };
   }
 }
 
 function updateGameArea() {
-  if (sprite.collision()) {
+  if (sprite.wallCollision()) {
     gameArea.stop();
+    gameOverString();
+    createStartOverBtn();
   } else {
     gameArea.clear();
     sprite.newPos();
     sprite.update();
+    fruit.update();
+    if (!sprite.fruitCollison(fruit)) {
+      fruit.randomSpawn();
+    }
   }
 }
 
@@ -77,6 +116,24 @@ function moveSprite(e) {
     sprite.posY = 0;
     sprite.posX = -1;
   }
+}
+
+function gameOverString() {
+  let ctx = gameArea.context;
+  ctx.textAlign = "center";
+  ctx.font = "50px comic sans";
+  ctx.fillText("GAME OVER", 200, 200);
+}
+
+function createStartOverBtn() {
+  let startOverbtn = document.createElement("button");
+  startOverbtn.innerText = "Start Over";
+  document.body.appendChild(startOverbtn);
+
+  startOverbtn.addEventListener("click", function () {
+    startGame();
+    document.body.removeChild(startOverbtn);
+  });
 }
 
 document.onkeydown = moveSprite;
